@@ -11,7 +11,7 @@ class Category extends Model
 
     protected $fillable = ['nama_kategori'];
 
-    // Relasi ke MeetingRoom (Many-to-Many)
+    // Relasi ke meeting room (Many-to-Many)
     public function meetingRooms()
     {
         return $this->belongsToMany(MeetingRoom::class, 'category_meeting_room');
