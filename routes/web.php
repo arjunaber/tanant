@@ -1,20 +1,46 @@
 <?php
+// routes/web.php
 
-use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UnitController;
+use App\Http\Controllers\RentalController;
 
-Route::get('/', function () {
-    return view('welcome');
+// Public routes
+Route::get('/', [HomeController::class, 'index'])->name('home');
+
+// Auth routes
+Route::middleware('guest')->group(function () {
+    Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [AuthController::class, 'login']);
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
-
+// Protected routes (require login)
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
+    // Dashboard route - TAMBAHKAN INI
+    Route::get('/dashboard', [HomeController::class, 'dashboard'])->name('dashboard');
 
-require __DIR__.'/auth.php';
+    // Profile routes
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
+
+    // Unit routes
+    Route::get('/units', [UnitController::class, 'index'])->name('units.index');
+    Route::get('/units/{id}', [UnitController::class, 'show'])->name('units.show');
+    Route::get('/units/search/ajax', [UnitController::class, 'search'])->name('units.search.ajax');
+
+    // Rental routes
+    Route::get('/rentals/create/{unit}', [RentalController::class, 'create'])->name('rentals.create');
+    Route::post('/rentals/store/{unit}', [RentalController::class, 'store'])->name('rentals.store');
+    Route::get('/my-rentals', [RentalController::class, 'myRentals'])->name('rentals.my-rentals');
+    Route::get('/rentals/{id}', [RentalController::class, 'show'])->name('rentals.show');
+    Route::post('/rentals/calculate-price/{unit}', [RentalController::class, 'calculatePrice'])->name('rentals.calculate-price');
+
+    // Logout
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+});
