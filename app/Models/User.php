@@ -44,7 +44,7 @@ class User extends Authenticatable
         return $this->hasMany(Rental::class, 'processed_by');
     }
 
-    // Methods
+    // Methods - TAMBAHKAN METHOD INI
     public function isAdmin()
     {
         return $this->role === 'admin';

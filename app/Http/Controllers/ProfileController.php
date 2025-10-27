@@ -1,60 +1,71 @@
 <?php
-
+// app/Http/Controllers/ProfileController.php
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ProfileUpdateRequest;
-use Illuminate\Http\RedirectResponse;
+use App\Models\Profile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\View\View;
+use Illuminate\Support\Facades\Validator;
 
 class ProfileController extends Controller
 {
-    /**
-     * Display the user's profile form.
-     */
-    public function edit(Request $request): View
+    public function __construct()
     {
-        return view('profile.edit', [
-            'user' => $request->user(),
-        ]);
+        $this->middleware('auth');
     }
 
-    /**
-     * Update the user's profile information.
-     */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    // Show profile
+    public function show()
     {
-        $request->user()->fill($request->validated());
+        $user = Auth::user();
+        $profile = Profile::where('user_id', $user->id)->first();
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        return view('profile.show', compact('user', 'profile'));
+    }
+
+    // Edit profile form
+    public function edit()
+    {
+        $user = Auth::user();
+        $profile = Profile::where('user_id', $user->id)->first();
+
+        return view('profile.edit', compact('user', 'profile'));
+    }
+
+    // Update profile - CARA ALTERNATIF YANG LEBIH AMAN
+    public function update(Request $request)
+    {
+        $user = Auth::user();
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'phone' => 'required|string|max:15',
+            'address' => 'required|string',
+            'identity_number' => 'required|string|max:20',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
         }
 
-        $request->user()->save();
-
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
-    }
-
-    /**
-     * Delete the user's account.
-     */
-    public function destroy(Request $request): RedirectResponse
-    {
-        $request->validateWithBag('userDeletion', [
-            'password' => ['required', 'current_password'],
+        // Update user
+        $user->update([
+            'name' => $request->name,
         ]);
 
-        $user = $request->user();
+        // Update or create profile
+        Profile::updateOrCreate(
+            ['user_id' => $user->id],
+            [
+                'phone' => $request->phone,
+                'address' => $request->address,
+                'identity_number' => $request->identity_number,
+            ]
+        );
 
-        Auth::logout();
-
-        $user->delete();
-
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return Redirect::to('/');
+        return redirect()->route('profile.show')
+            ->with('success', 'Profile berhasil diperbarui.');
     }
 }
