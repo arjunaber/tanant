@@ -57,6 +57,20 @@ class Unit extends Model
         return $this->status === 'maintenance';
     }
 
+    public function getStatusBadge()
+    {
+        switch ($this->status) {
+            case 'available':
+                return '<span class="text-xs font-medium text-green-800 bg-green-100 px-2 py-1 rounded">Tersedia</span>';
+            case 'occupied':
+                return '<span class="text-xs font-medium text-red-800 bg-red-100 px-2 py-1 rounded">Ditempati</span>';
+            case 'maintenance':
+                return '<span class="text-xs font-medium text-yellow-800 bg-yellow-100 px-2 py-1 rounded">Perawatan</span>';
+            default:
+                return '<span class="text-xs font-medium text-gray-800 bg-gray-100 px-2 py-1 rounded">Unknown</span>';
+        }
+    }
+
     public function getFormattedPrice()
     {
         return 'Rp ' . number_format($this->price_per_day, 0, ',', '.');

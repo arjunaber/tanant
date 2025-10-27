@@ -8,25 +8,27 @@ use Illuminate\Http\Request;
 
 class UnitController extends Controller
 {
-    // List all available units
     public function index(Request $request)
     {
-        $query = Unit::with('categories')->available();
+        $page = $request->get('page', 1);
+        $perPage = 3;
 
-        // Search functionality
-        if ($request->has('search') && $request->search != '') {
-            $query->search($request->search);
+        $units = Unit::with('categories')
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage, ['*'], 'page', $page);
+
+        $categories = Category::withCount(['units' => function ($query) {
+            $query->where('status', 'available');
+        }])->get();
+
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('partials.unit-cards', compact('units'))->render(),
+                'hasMore' => $units->hasMorePages()
+            ]);
         }
 
-        // Filter by category
-        if ($request->has('category_id') && $request->category_id != '') {
-            $query->byCategory($request->category_id);
-        }
-
-        $units = $query->latest()->paginate(9);
-        $categories = Category::all();
-
-        return view('units.index', compact('units', 'categories'));
+        return view('home', compact('categories', 'units'));
     }
 
     // Show unit details
@@ -37,7 +39,16 @@ class UnitController extends Controller
         // Check if user can rent this unit
         $canRent = auth()->check() && auth()->user()->canRentAnotherUnit() && $unit->isAvailable();
 
-        return view('units.show', compact('unit', 'canRent'));
+        // Get related units (same categories)
+        $relatedUnits = Unit::whereHas('categories', function ($query) use ($unit) {
+            $query->whereIn('categories.id', $unit->categories->pluck('id'));
+        })
+            ->where('id', '!=', $unit->id)
+            ->available()
+            ->limit(4)
+            ->get();
+
+        return view('units.show', compact('unit', 'canRent', 'relatedUnits'));
     }
 
     // Search units API for AJAX
