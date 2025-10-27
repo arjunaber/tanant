@@ -71,19 +71,37 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <x-input-label for="start_date" :value="__('Tanggal Mulai')" />
-                                <x-text-input id="start_date" name="start_date" type="date"
-                                              :value="old('start_date')"
-                                              class="mt-1 block w-full"
-                                              required />
+                                <div class="relative mt-1">
+                                    <x-text-input id="start_date" name="start_date" type="text"
+                                                  :value="old('start_date')"
+                                                  class="block w-full date-picker-input font-bold text-gray-900"
+                                                  placeholder="Pilih tanggal mulai"
+                                                  readonly
+                                                  required />
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4m-6 4v10a2 2 0 002 2h4a2 2 0 002-2V11m-8 0h8"></path>
+                                        </svg>
+                                    </div>
+                                </div>
                                 <x-input-error :messages="$errors->get('start_date')" class="mt-2" />
                             </div>
 
                             <div>
                                 <x-input-label for="end_date" :value="__('Tanggal Selesai')" />
-                                <x-text-input id="end_date" name="end_date" type="date"
-                                              :value="old('end_date')"
-                                              class="mt-1 block w-full"
-                                              required />
+                                <div class="relative mt-1">
+                                    <x-text-input id="end_date" name="end_date" type="text"
+                                                  :value="old('end_date')"
+                                                  class="block w-full date-picker-input font-bold text-gray-900"
+                                                  placeholder="Pilih tanggal selesai"
+                                                  readonly
+                                                  required />
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                        </svg>
+                                    </div>
+                                </div>
                                 <x-input-error :messages="$errors->get('end_date')" class="mt-2" />
                             </div>
                         </div>
@@ -110,11 +128,11 @@
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div>
                                     <span class="text-sm text-gray-600">Jumlah Hari:</span>
-                                    <p id="rental-days" class="font-medium text-blue-600">-</p>
+                                    <p id="rental-days" class="font-bold text-gray-900">-</p>
                                 </div>
                                 <div>
                                     <span class="text-sm text-gray-600">Harga per Hari:</span>
-                                    <p class="font-medium">Rp {{ number_format($unit->price_per_day, 0, ',', '.') }}</p>
+                                    <p class="font-bold text-gray-900">Rp {{ number_format($unit->price_per_day, 0, ',', '.') }}</p>
                                 </div>
                                 <div>
                                     <span class="text-sm text-gray-600">Total Harga:</span>
@@ -140,19 +158,133 @@
         </div>
     </div>
 
+    <!-- Include Flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    
+    <style>
+        .flatpickr-input:focus {
+            border-color: #6366f1;
+            ring-color: rgba(99, 102, 241, 0.2);
+        }
+        
+        .date-picker-input {
+            cursor: pointer;
+            background-color: white;
+        }
+        
+        .flatpickr-calendar {
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .flatpickr-day.selected {
+            background-color: #4f46e5;
+            border-color: #4f46e5;
+        }
+        
+        .flatpickr-day:hover {
+            background-color: #e5e7eb;
+        }
+
+        /* Styling untuk text yang ditampilkan di date picker */
+        .flatpickr-input {
+            font-weight: 700 !important;
+            color: #1f2937 !important;
+        }
+
+        /* Display format untuk preview */
+        .date-display {
+            font-weight: 700;
+            color: #1f2937;
+        }
+    </style>
+
+    <!-- Include Flatpickr JS -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
+    
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const startDateInput = document.getElementById('start_date');
-            const endDateInput = document.getElementById('end_date');
+            // Initialize date pickers dengan format Y-m-d untuk backend
+            const startDatePicker = flatpickr("#start_date", {
+                locale: "id",
+                dateFormat: "Y-m-d", // Format untuk backend (Carbon compatible)
+                altFormat: "j F Y",  // Format untuk display
+                altInput: true,      // Gunakan altInput untuk display yang lebih user-friendly
+                altInputClass: "font-bold text-gray-900 flatpickr-input",
+                minDate: "today",
+                disableMobile: true,
+                onChange: function(selectedDates, dateStr) {
+                    updateEndDateMinDate();
+                    calculatePrice();
+                }
+            });
+            
+            const endDatePicker = flatpickr("#end_date", {
+                locale: "id",
+                dateFormat: "Y-m-d", // Format untuk backend (Carbon compatible)
+                altFormat: "j F Y",  // Format untuk display
+                altInput: true,      // Gunakan altInput untuk display yang lebih user-friendly
+                altInputClass: "font-bold text-gray-900 flatpickr-input",
+                minDate: "today",
+                disableMobile: true,
+                onChange: function() {
+                    calculatePrice();
+                }
+            });
+            
+            function updateEndDateMinDate() {
+                const startDate = startDatePicker.selectedDates[0];
+                if (startDate) {
+                    endDatePicker.set('minDate', startDate);
+                    
+                    // If end date is before start date, clear it
+                    const endDate = endDatePicker.selectedDates[0];
+                    if (endDate && endDate < startDate) {
+                        endDatePicker.clear();
+                    }
+                }
+            }
+            
             const priceCalculation = document.getElementById('price-calculation');
             const rentalDaysEl = document.getElementById('rental-days');
             const totalPriceEl = document.getElementById('total-price');
-
+            
             function calculatePrice() {
-                const startDate = startDateInput.value;
-                const endDate = endDateInput.value;
-
+                const startDate = startDatePicker.selectedDates[0];
+                const endDate = endDatePicker.selectedDates[0];
+                
                 if (startDate && endDate) {
+                    // Calculate days difference
+                    const timeDiff = endDate - startDate;
+                    const dayDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24)) + 1;
+                    
+                    // Validate max rental days (5 days)
+                    if (dayDiff > 5) {
+                        alert('Maksimal peminjaman adalah 5 hari. Silakan pilih tanggal yang sesuai.');
+                        endDatePicker.clear();
+                        priceCalculation.classList.add('hidden');
+                        return;
+                    }
+                    
+                    // Calculate total price
+                    const pricePerDay = {{ $unit->price_per_day }};
+                    const totalPrice = dayDiff * pricePerDay;
+                    
+                    // Format price for display
+                    const formattedPrice = new Intl.NumberFormat('id-ID', {
+                        style: 'currency',
+                        currency: 'IDR',
+                        minimumFractionDigits: 0
+                    }).format(totalPrice);
+                    
+                    // Update display
+                    priceCalculation.classList.remove('hidden');
+                    rentalDaysEl.textContent = dayDiff + ' hari';
+                    totalPriceEl.textContent = formattedPrice;
+                    
+                    // Send to server for validation
                     fetch(`{{ route('rentals.calculate-price', $unit->id) }}`, {
                         method: 'POST',
                         headers: {
@@ -160,34 +292,43 @@
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                         },
                         body: JSON.stringify({
-                            start_date: startDate,
-                            end_date: endDate
+                            start_date: startDatePicker.input.value,
+                            end_date: endDatePicker.input.value
                         })
                     })
                     .then(response => response.json())
                     .then(data => {
-                        if (data.success) {
-                            priceCalculation.classList.remove('hidden');
-                            rentalDaysEl.textContent = data.rental_days + ' hari';
-                            totalPriceEl.textContent = data.formatted_total_price;
-                        } else {
-                            priceCalculation.classList.add('hidden');
-                            if (data.errors) {
-                                // Handle validation errors if needed
+                        if (!data.success && data.errors) {
+                            // Handle server-side validation errors
+                            if (data.errors.start_date) {
+                                alert(data.errors.start_date[0]);
+                            }
+                            if (data.errors.end_date) {
+                                alert(data.errors.end_date[0]);
                             }
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        priceCalculation.classList.add('hidden');
                     });
                 } else {
                     priceCalculation.classList.add('hidden');
                 }
             }
-
-            startDateInput.addEventListener('change', calculatePrice);
-            endDateInput.addEventListener('change', calculatePrice);
+            
+            // Initialize if there are old values
+            @if(old('start_date'))
+                startDatePicker.setDate('{{ old('start_date') }}');
+            @endif
+            
+            @if(old('end_date'))
+                endDatePicker.setDate('{{ old('end_date') }}');
+            @endif
+            
+            // Calculate price on page load if dates exist
+            if (startDatePicker.selectedDates.length > 0 && endDatePicker.selectedDates.length > 0) {
+                calculatePrice();
+            }
         });
     </script>
 </x-app-layout>
