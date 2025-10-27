@@ -34,21 +34,29 @@ class UnitController extends Controller
     // Show unit details
     public function show($id)
     {
-        $unit = Unit::with('categories')->findOrFail($id);
+        try {
+            $unit = Unit::with('categories')->findOrFail($id);
 
-        // Check if user can rent this unit
-        $canRent = auth()->check() && auth()->user()->canRentAnotherUnit() && $unit->isAvailable();
+            // Check if user can rent this unit - PERBAIKAN VALIDASI
+            $canRent = false;
+            if (auth()->check()) {
+                $user = auth()->user();
+                $canRent = $user->canRentAnotherUnit() && $unit->isAvailable();
+            }
 
-        // Get related units (same categories)
-        $relatedUnits = Unit::whereHas('categories', function ($query) use ($unit) {
-            $query->whereIn('categories.id', $unit->categories->pluck('id'));
-        })
-            ->where('id', '!=', $unit->id)
-            ->available()
-            ->limit(4)
-            ->get();
+            // Get related units (same categories) - PERBAIKAN QUERY
+            $relatedUnits = Unit::whereHas('categories', function ($query) use ($unit) {
+                $query->whereIn('categories.id', $unit->categories->pluck('id'));
+            })
+                ->where('id', '!=', $unit->id)
+                ->where('status', 'available') // Ganti dari available() scope
+                ->limit(4)
+                ->get();
 
-        return view('units.show', compact('unit', 'canRent', 'relatedUnits'));
+            return view('units.show', compact('unit', 'canRent', 'relatedUnits'));
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            abort(404, 'Ruangan tidak ditemukan');
+        }
     }
 
     // Search units API for AJAX
