@@ -8,12 +8,20 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
+use Midtrans\Config;
+use Midtrans\Snap;
 
 class RentalController extends Controller
 {
     public function __construct()
     {
         $this->middleware('auth');
+
+        // Set Midtrans configuration
+        Config::$serverKey = config('services.midtrans.server_key');
+        Config::$isProduction = config('services.midtrans.is_production');
+        Config::$isSanitized = config('services.midtrans.is_sanitized');
+        Config::$is3ds = config('services.midtrans.is_3ds');
     }
 
     // Show rental form
@@ -79,7 +87,7 @@ class RentalController extends Controller
         $rentalDays = $startDate->diffInDays($endDate) + 1;
         $totalPrice = $unit->calculateRentalPrice($rentalDays);
 
-        // Create rental
+        // Create rental with pending payment status
         $rental = Rental::create([
             'user_id' => $user->id,
             'unit_id' => $unit->id,
@@ -87,11 +95,57 @@ class RentalController extends Controller
             'end_date' => $request->end_date,
             'total_price' => $totalPrice,
             'purpose' => $request->purpose,
-            'status' => 'active',
+            'status' => 'pending',
+            'payment_status' => 'pending',
         ]);
 
-        return redirect()->route('rentals.my-rentals')
-            ->with('success', 'Peminjaman ruangan berhasil! Kode peminjaman: ' . $rental->rental_code);
+        // Create Midtrans transaction
+        $transactionId = 'RENT-' . $rental->id . '-' . time();
+
+        $params = [
+            'transaction_details' => [
+                'order_id' => $transactionId,
+                'gross_amount' => $totalPrice,
+            ],
+            'customer_details' => [
+                'first_name' => $user->name,
+                'email' => $user->email,
+            ],
+            'item_details' => [
+                [
+                    'id' => $unit->id,
+                    'price' => $unit->price_per_day,
+                    'quantity' => $rentalDays,
+                    'name' => 'Peminjaman ' . $unit->name . ' (' . $rentalDays . ' hari)',
+                ]
+            ],
+            'callbacks' => [
+                'finish' => route('payment.success'),
+                'error' => route('payment.failed'),
+                'pending' => route('payment.pending'),
+            ],
+        ];
+
+        try {
+            $snapToken = Snap::getSnapToken($params);
+
+            // Update rental with transaction details
+            $rental->update([
+                'transaction_id' => $transactionId,
+                'payment_url' => $snapToken,
+            ]);
+
+            // Redirect to payment page
+            return view('rentals.payment', compact('rental', 'snapToken'));
+
+        } catch (\Exception $e) {
+            // If payment creation fails, delete rental and redirect back
+            $rental->delete();
+
+            return redirect()->back()
+                ->withErrors(['payment' => 'Gagal membuat pembayaran. Silakan coba lagi.'])
+                ->withInput();
+        }
     }
 
     // Show user's rentals
@@ -117,6 +171,68 @@ class RentalController extends Controller
         $rental->checkOverdue();
 
         return view('rentals.show', compact('rental'));
+    }
+
+    // Show payment page
+    public function payment($rentalId)
+    {
+        $rental = Rental::with('unit')
+            ->where('user_id', Auth::id())
+            ->findOrFail($rentalId);
+
+        // Only allow payment for pending rentals
+        if ($rental->status !== 'pending' || $rental->payment_status !== 'pending') {
+            return redirect()->route('rentals.show', $rental->id)
+                ->with('error', 'Pembayaran tidak dapat diproses untuk peminjaman ini.');
+        }
+
+        // Check if snap token exists, if not create new one
+        if (!$rental->payment_url) {
+            // Recreate Midtrans transaction
+            $transactionId = 'RENT-' . $rental->id . '-' . time();
+
+            $params = [
+                'transaction_details' => [
+                    'order_id' => $transactionId,
+                    'gross_amount' => $rental->total_price,
+                ],
+                'customer_details' => [
+                    'first_name' => $rental->user->name,
+                    'email' => $rental->user->email,
+                ],
+                'item_details' => [
+                    [
+                        'id' => $rental->unit->id,
+                        'price' => $rental->unit->price_per_day,
+                        'quantity' => $rental->getRentalDays(),
+                        'name' => 'Peminjaman ' . $rental->unit->name . ' (' . $rental->getRentalDays() . ' hari)',
+                    ]
+                ],
+                'callbacks' => [
+                    'finish' => route('payment.success'),
+                    'error' => route('payment.failed'),
+                    'pending' => route('payment.pending'),
+                ],
+            ];
+
+            try {
+                $snapToken = Snap::getSnapToken($params);
+
+                // Update rental with new transaction details
+                $rental->update([
+                    'transaction_id' => $transactionId,
+                    'payment_url' => $snapToken,
+                ]);
+
+            } catch (\Exception $e) {
+                return redirect()->route('rentals.show', $rental->id)
+                    ->with('error', 'Gagal membuat pembayaran. Silakan coba lagi.');
+            }
+        }
+
+        $snapToken = $rental->payment_url;
+
+        return view('rentals.payment', compact('rental', 'snapToken'));
     }
 
     // Calculate rental price (AJAX)
