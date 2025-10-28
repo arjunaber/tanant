@@ -7,6 +7,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\RentalController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\UserController;
 
 // Public routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -57,4 +59,12 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/units/{id}', [UnitController::class, 'update'])->name('units.update');
     Route::delete('/units/{id}', [UnitController::class, 'destroy'])->name('units.destroy');
     Route::get('/admin/units/data', [UnitController::class, 'getUnitsData'])->name('admin.units.data');
+
+    // Categories Routes
+    Route::resource('categories', CategoryController::class)->except(['show']);
+    Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+
+    // Users Routes  
+    Route::resource('users', UserController::class)->except(['show']);
+    Route::get('/users', [UserController::class, 'index'])->name('users.index');
 });
