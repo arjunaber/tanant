@@ -35,4 +35,26 @@ class HomeController extends Controller
 
         return view('home', compact('categories', 'units'));
     }
+
+    public function adminIndex(Request $request)
+    {
+        $query = Unit::with('categories')->orderBy('created_at', 'desc');
+
+        // Search functionality
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where('name', 'like', "%{$search}%");
+        }
+
+        $units = $query->paginate(10); // 10 items per page
+        $categories = Category::all();
+
+        $user = auth()->user();
+
+        if ($user && $user->role === 'admin') {
+            return view('admin.index', compact('categories', 'units'));
+        }
+
+        return view('home', compact('categories', 'units'));
+    }
 }
