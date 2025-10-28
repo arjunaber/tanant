@@ -17,9 +17,9 @@ class UnitController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate($perPage, ['*'], 'page', $page);
 
-        $categories = Category::withCount(['units' => function ($query) {
-            $query->where('status', 'available');
-        }])->get();
+        $categories = Category::all(); // Sederhanakan query categories
+
+        $user = auth()->user();
 
         if ($request->ajax()) {
             return response()->json([
@@ -28,52 +28,92 @@ class UnitController extends Controller
             ]);
         }
 
+        // Tampilan khusus untuk admin
+        if ($user && $user->role === 'admin') {
+            return view('admin.index', compact('categories', 'units'));
+        }
+
+        // Default untuk user biasa
         return view('home', compact('categories', 'units'));
     }
 
-    // Show unit details
-    public function show($id)
+    public function store(Request $request)
     {
-        try {
-            $unit = Unit::with('categories')->findOrFail($id);
+        // validasi
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'status' => 'required|in:available,occupied,maintenance',
+            'category_id' => 'required|exists:categories,id',
+            'description' => 'nullable|string',
+            'price_per_day' => 'nullable|numeric|min:0',
+            'capacity' => 'nullable|integer|min:1',
+            'facilities' => 'nullable|string',
+        ]);
 
-            // Check if user can rent this unit - PERBAIKAN VALIDASI
-            $canRent = false;
-            if (auth()->check()) {
-                $user = auth()->user();
-                $canRent = $user->canRentAnotherUnit() && $unit->isAvailable();
-            }
+        // generate kode otomatis dan buat unit
+        $unit = Unit::create(array_merge($validated, [
+            'code' => 'UNIT-' . str_pad((Unit::max('id') ?? 0) + 1, 3, '0', STR_PAD_LEFT)
+        ]));
 
-            // Get related units (same categories) - PERBAIKAN QUERY
-            $relatedUnits = Unit::whereHas('categories', function ($query) use ($unit) {
-                $query->whereIn('categories.id', $unit->categories->pluck('id'));
-            })
-                ->where('id', '!=', $unit->id)
-                ->where('status', 'available') // Ganti dari available() scope
-                ->limit(4)
-                ->get();
+        $unit->categories()->attach($validated['category_id']);
 
-            return view('units.show', compact('unit', 'canRent', 'relatedUnits'));
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            abort(404, 'Ruangan tidak ditemukan');
-        }
+        return redirect()->route('admin.index')->with('success', 'Unit baru berhasil ditambahkan!');
     }
 
-    // Search units API for AJAX
-    public function search(Request $request)
+
+    // Update data unit - PERBAIKAN
+    public function update(Request $request, $id)
     {
-        $query = Unit::with('categories')->available();
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'status' => 'required|in:available,unavailable',
+            'category_id' => 'required|exists:categories,id',
+            'description' => 'nullable|string',
+            'price_per_day' => 'nullable|numeric|min:0',
+            'capacity' => 'nullable|integer|min:1',
+            'facilities' => 'nullable|string',
+        ]);
 
-        if ($request->has('search') && $request->search != '') {
-            $query->search($request->search);
-        }
+        $unit = Unit::findOrFail($id);
+        $unit->update([
+            'name' => $request->name,
+            'status' => $request->status,
+            'description' => $request->description,
+            'price_per_day' => $request->price_per_day,
+            'capacity' => $request->capacity,
+            'facilities' => $request->facilities,
+        ]);
 
-        if ($request->has('category_id') && $request->category_id != '') {
-            $query->byCategory($request->category_id);
-        }
+        // Update relasi kategori
+        $unit->categories()->sync([$request->category_id]);
 
-        $units = $query->take(10)->get();
+        return redirect()->route('admin.index')->with('success', 'Data unit berhasil diperbarui!');
+    }
 
-        return response()->json($units);
+    // Hapus unit
+    public function destroy($id)
+    {
+        $unit = Unit::findOrFail($id);
+        $unit->categories()->detach();
+        $unit->delete();
+
+        return redirect()->route('admin.index')->with('success', 'Unit berhasil dihapus!');
+    }
+
+    public function getUnitsData(Request $request)
+    {
+        $units = Unit::with('categories')
+            ->select(['id', 'name', 'status', 'price_per_day', 'capacity', 'facilities', 'description', 'created_at'])
+            ->get();
+
+        return datatables()->of($units)
+            ->addColumn('action', function ($unit) {
+                return view('admin.partials.actions', compact('unit'))->render();
+            })
+            ->addColumn('categories', function ($unit) {
+                return $unit->categories->pluck('name')->implode(', ');
+            })
+            ->rawColumns(['action'])
+            ->make(true);
     }
 }

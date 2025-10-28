@@ -44,3 +44,17 @@ Route::middleware('auth')->group(function () {
     // Logout
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/admin', [HomeController::class, 'adminIndex'])->name('admin.index');
+    // Unit routes
+    Route::get('/units', [UnitController::class, 'index'])->name('units.index');
+    Route::get('/units/create', [UnitController::class, 'create'])->name('units.create');
+    Route::post('/units', [UnitController::class, 'store'])->name('units.store');
+    Route::get('/units/{id}', [UnitController::class, 'show'])->name('units.show');
+    Route::get('/units/search/ajax', [UnitController::class, 'search'])->name('units.search.ajax');
+    Route::get('/units/{id}/edit', [UnitController::class, 'edit'])->name('units.edit');
+    Route::put('/units/{id}', [UnitController::class, 'update'])->name('units.update');
+    Route::delete('/units/{id}', [UnitController::class, 'destroy'])->name('units.destroy');
+    Route::get('/admin/units/data', [UnitController::class, 'getUnitsData'])->name('admin.units.data');
+});

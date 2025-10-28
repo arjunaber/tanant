@@ -77,10 +77,8 @@ class AuthController extends Controller
 
             $user = Auth::user();
 
-            // Redirect berdasarkan role
             if ($user->role === 'admin') {
-                // Jika nanti ada dashboard admin, ganti dengan route yang sesuai
-                return redirect()->route('units.index')
+                return redirect()->route('admin.index')
                     ->with('success', 'Login admin berhasil!');
             }
 
