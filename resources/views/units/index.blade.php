@@ -13,7 +13,7 @@
 
         <!-- Search and Filter Section -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-            <form action="{{ route('units.index') }}" method="GET" class="space-y-4 md:space-y-0 md:flex md:items-end md:space-x-4">
+            <form action="{{ url('/units') }}" method="GET" class="space-y-4 md:space-y-0 md:flex md:items-end md:space-x-4">
                 <!-- Search Input -->
                 <div class="flex-1">
                     <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Cari Ruangan</label>

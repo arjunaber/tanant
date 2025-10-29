@@ -4,7 +4,7 @@
             <!-- Breadcrumb -->
             <nav class="mb-6">
                 <ol class="flex items-center space-x-2 text-sm text-gray-600">
-                    <li><a href="{{ route('units.index') }}" class="hover:text-blue-600">Ruangan</a></li>
+                    <li><a href="{{ url('/units') }}" class="hover:text-blue-600">Ruangan</a></li>
                     <li class="flex items-center">
                         <svg class="w-4 h-4 mx-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>

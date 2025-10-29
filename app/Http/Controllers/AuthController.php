@@ -54,7 +54,7 @@ class AuthController extends Controller
 
         Auth::login($user);
 
-        return redirect()->route('units.index')
+        return redirect()->url('/units')
             ->with('success', 'Registrasi berhasil! Selamat datang.');
     }
 
@@ -82,8 +82,8 @@ class AuthController extends Controller
                     ->with('success', 'Login admin berhasil!');
             }
 
-            return redirect()->route('units.index')
-                ->with('success', 'Login berhasil!');
+              return view('home')
+                  ->with('success', 'Login berhasil! Selamat datang kembali.');
         }
 
         return back()->withErrors([
