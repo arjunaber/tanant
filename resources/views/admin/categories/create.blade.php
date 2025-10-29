@@ -50,28 +50,16 @@
                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 outline-none resize-none"
                         placeholder="Tambahkan deskripsi kategori (opsional)">{{ old('description') }}</textarea>
                     <p class="text-gray-500 text-xs mt-2">Deskripsi membantu mengidentifikasi tujuan kategori</p>
-                    @error('description')
-                        <p class="text-red-500 text-xs mt-2 flex items-center">
-                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd"
-                                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                                    clip-rule="evenodd" />
-                            </svg>
-                            {{ $message }}
-                        </p>
-                    @enderror
                 </div>
 
-                <!-- Informasi Tambahan -->
+                <!-- Tips -->
                 <div class="bg-green-50 border border-green-200 rounded-lg p-4">
                     <div class="flex items-start space-x-3">
-                        <div class="flex-shrink-0">
-                            <svg class="w-5 h-5 text-green-600 mt-0.5" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
+                        <svg class="w-5 h-5 text-green-600 mt-0.5" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
                         <div>
                             <h4 class="text-sm font-semibold text-green-800">Tips Kategori yang Baik</h4>
                             <ul class="text-xs text-green-700 mt-1 space-y-1">
@@ -119,7 +107,6 @@
         animation: fade-in 0.2s ease-out;
     }
 
-    /* Custom scrollbar */
     .overflow-y-auto::-webkit-scrollbar {
         width: 8px;
     }
@@ -138,7 +125,6 @@
         background: #94a3b8;
     }
 
-    /* Focus styles untuk input */
     input:focus,
     textarea:focus {
         box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
@@ -146,48 +132,42 @@
 </style>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const openModalBtns = document.querySelectorAll('[data-modal-toggle="createCategoryModal"]');
-        const closeModalBtns = document.querySelectorAll('[data-modal-hide="createCategoryModal"]');
+    document.addEventListener('DOMContentLoaded', () => {
         const modal = document.getElementById('createCategoryModal');
 
-        openModalBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
+        // Open modal (pakai atribut dari tombol)
+        document.querySelectorAll('[data-modal-toggle="createCategoryModal"]').forEach(btn => {
+            btn.addEventListener('click', e => {
+                e.preventDefault();
                 modal.classList.remove('hidden');
                 document.body.style.overflow = 'hidden';
+                setTimeout(() => document.getElementById('name').focus(), 150);
             });
         });
 
-        closeModalBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
+        // Close modal (tombol close atau batal)
+        document.querySelectorAll('[data-modal-hide="createCategoryModal"]').forEach(btn => {
+            btn.addEventListener('click', e => {
+                e.preventDefault();
                 modal.classList.add('hidden');
                 document.body.style.overflow = '';
             });
         });
 
-        // Tutup modal jika klik di luar area modal
-        modal.addEventListener('click', (e) => {
+        // Close jika klik di backdrop
+        modal.addEventListener('click', e => {
             if (e.target === modal) {
                 modal.classList.add('hidden');
                 document.body.style.overflow = '';
             }
         });
 
-        // Tutup modal dengan tombol ESC
-        document.addEventListener('keydown', (e) => {
+        // Tutup pakai ESC
+        document.addEventListener('keydown', e => {
             if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
                 modal.classList.add('hidden');
                 document.body.style.overflow = '';
             }
-        });
-
-        // Auto focus ke input nama ketika modal terbuka
-        openModalBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                setTimeout(() => {
-                    document.getElementById('name').focus();
-                }, 300);
-            });
         });
     });
 </script>
