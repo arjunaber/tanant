@@ -1,3 +1,4 @@
+{{-- resources/views/admin/index.blade.php --}}
 @extends('layouts.admin')
 
 @section('title', 'Dashboard Admin')
@@ -432,7 +433,7 @@
                                             class="edit-btn inline-flex items-center justify-center px-3 py-2 bg-yellow-500 hover:bg-yellow-600 text-white text-xs font-semibold rounded transition-all duration-200 min-h-[32px]"
                                             data-id="{{ $unit->id }}" data-name="{{ $unit->name }}"
                                             data-status="{{ $unit->status }}"
-                                            data-category="{{ $unit->categories->first()->id ?? '' }}"
+                                            data-category="{{ $unit->categories->pluck('id')->implode(',') }}"
                                             data-description="{{ $unit->description }}"
                                             data-price="{{ $unit->price_per_day }}"
                                             data-capacity="{{ $unit->capacity }}"

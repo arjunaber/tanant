@@ -39,35 +39,38 @@ class UnitController extends Controller
 
     public function store(Request $request)
     {
-        // validasi
+        // Validasi untuk multiple categories
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'status' => 'required|in:available,occupied,maintenance',
-            'category_id' => 'required|exists:categories,id',
+            'category_id' => 'required|array', // Ubah menjadi array
+            'category_id.*' => 'exists:categories,id', // Validasi setiap item array
             'description' => 'nullable|string',
             'price_per_day' => 'nullable|numeric|min:0',
             'capacity' => 'nullable|integer|min:1',
             'facilities' => 'nullable|string',
         ]);
 
-        // generate kode otomatis dan buat unit
+        // Generate kode otomatis dan buat unit
         $unit = Unit::create(array_merge($validated, [
             'code' => 'UNIT-' . str_pad((Unit::max('id') ?? 0) + 1, 3, '0', STR_PAD_LEFT)
         ]));
 
+        // Attach multiple categories
         $unit->categories()->attach($validated['category_id']);
 
         return redirect()->route('admin.index')->with('success', 'Unit baru berhasil ditambahkan!');
     }
 
 
-    // Update data unit - PERBAIKAN
+    // Update data unit - FIXED untuk multiple categories
     public function update(Request $request, $id)
     {
         $request->validate([
             'name' => 'required|string|max:255',
             'status' => 'required|in:available,unavailable',
-            'category_id' => 'required|exists:categories,id',
+            'category_id' => 'required|array', // Ubah menjadi array
+            'category_id.*' => 'exists:categories,id', // Validasi setiap item array
             'description' => 'nullable|string',
             'price_per_day' => 'nullable|numeric|min:0',
             'capacity' => 'nullable|integer|min:1',
@@ -84,8 +87,8 @@ class UnitController extends Controller
             'facilities' => $request->facilities,
         ]);
 
-        // Update relasi kategori
-        $unit->categories()->sync([$request->category_id]);
+        // Update relasi kategori dengan sync (untuk multiple categories)
+        $unit->categories()->sync($request->category_id);
 
         return redirect()->route('admin.index')->with('success', 'Data unit berhasil diperbarui!');
     }
