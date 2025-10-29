@@ -134,6 +134,30 @@ class UnitController extends Controller
         return redirect()->route('admin.index')->with('success', 'Unit berhasil dihapus!');
     }
 
+    public function show($id)
+    {
+        $unit = Unit::with('categories')->findOrFail($id);
+
+        // Check if user can rent this unit
+        $canRent = false;
+        if (auth()->check()) {
+            $user = auth()->user();
+            $activeRentals = $user->rentals()->whereIn('status', ['pending', 'confirmed', 'active'])->count();
+            $canRent = $unit->status === 'available' && $activeRentals < 2;
+        }
+
+        // Get related units (same category, excluding current unit)
+        $relatedUnits = Unit::whereHas('categories', function ($query) use ($unit) {
+            $query->whereIn('categories.id', $unit->categories->pluck('id'));
+        })
+        ->where('id', '!=', $unit->id)
+        ->where('status', 'available')
+        ->take(3)
+        ->get();
+
+        return view('units.show', compact('unit', 'canRent', 'relatedUnits'));
+    }
+
     public function getUnitsData(Request $request)
     {
         $units = Unit::with('categories')
