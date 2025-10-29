@@ -37,6 +37,37 @@ class UnitController extends Controller
         return view('home', compact('categories', 'units'));
     }
 
+    public function show($id)
+    {
+        $unit = Unit::with('categories')->findOrFail($id);
+
+        // Ambil ruangan serupa berdasarkan kategori pertama (kalau ada)
+        $relatedUnits = collect(); // nilai default biar aman kalau tidak ada kategori
+
+        if ($unit->categories->isNotEmpty()) {
+            $firstCategoryId = $unit->categories->first()->id;
+            $relatedUnits = Unit::whereHas('categories', function ($query) use ($firstCategoryId) {
+                $query->where('categories.id', $firstCategoryId);
+            })
+                ->where('id', '!=', $unit->id)
+                ->take(4)
+                ->get();
+        }
+
+        // Tentukan apakah user bisa menyewa
+        $canRent = false;
+        if (auth()->check()) {
+            $activeRentals = \App\Models\Rental::where('user_id', auth()->id())
+                ->whereIn('status', ['active', 'overdue'])
+                ->count();
+
+            $canRent = $activeRentals < 2 && $unit->status === 'available';
+        }
+
+        return view('units.show', compact('unit', 'relatedUnits', 'canRent'));
+    }
+
+
     public function store(Request $request)
     {
         // Validasi untuk multiple categories
