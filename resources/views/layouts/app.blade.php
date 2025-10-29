@@ -24,7 +24,7 @@
                     </div>
                     <div class="flex items-center space-x-4">
                         @auth
-                            <a href="{{ route('units.index') }}" class="text-gray-700 hover:text-blue-600">Ruangan</a>
+                           <a href="{{ url('/units') }}" class="text-gray-700 hover:text-blue-600">Ruangan</a>
                             <a href="{{ route('rentals.my-rentals') }}" class="text-gray-700 hover:text-blue-600">Peminjaman
                                 Saya</a>
                             <a href="{{ route('profile.show') }}" class="text-gray-700 hover:text-blue-600">Profile</a>

@@ -68,7 +68,7 @@
                             class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
                         Terapkan
                     </button>
-                    <a href="{{ route('units.index') }}" 
+                   <a href="{{ url('/units') }}" 
                        class="px-6 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500">
                         Reset
                     </a>
@@ -212,7 +212,7 @@
                     @endif
                 </p>
                 <div class="flex justify-center space-x-4">
-                    <a href="{{ route('units.index') }}" 
+                   <a href="{{ url('/units') }}" 
                        class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
                         Tampilkan Semua Ruangan
                     </a>
