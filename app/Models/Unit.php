@@ -47,6 +47,8 @@ class Unit extends Model
         return $this->status === 'available';
     }
 
+
+
     public function isOccupied()
     {
         return $this->status === 'occupied';
@@ -65,7 +67,7 @@ class Unit extends Model
             case 'occupied':
                 return '<span class="text-xs font-medium text-red-800 bg-red-100 px-2 py-1 rounded">Ditempati</span>';
             case 'maintenance':
-                return '<span class="text-xs font-medium text-yellow-800 bg-yellow-100 px-2 py-1 rounded">Perawatan</span>';
+                return '<span class="text-xs font-medium text-gray-800 bg-gray-100 px-2 py-1 rounded">Perawatan</span>';
             default:
                 return '<span class="text-xs font-medium text-gray-800 bg-gray-100 px-2 py-1 rounded">Unknown</span>';
         }
@@ -101,6 +103,8 @@ class Unit extends Model
     {
         return $query->where('status', 'available');
     }
+
+
 
     public function scopeOccupied($query)
     {

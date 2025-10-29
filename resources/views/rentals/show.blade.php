@@ -46,6 +46,10 @@
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
                                     Dibatalkan
                                 </span>
+                            @elseif($rental->status === 'pending')
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                                    Menunggu Pembayaran
+                                </span>
                             @endif
                         </div>
                     </div>
@@ -90,9 +94,27 @@
                                             <span class="text-red-600">Terlambat</span>
                                         @elseif($rental->status === 'cancelled')
                                             <span class="text-gray-600">Dibatalkan</span>
+                                        @elseif($rental->status === 'pending')
+                                            <span class="text-yellow-600">Menunggu Pembayaran</span>
                                         @endif
                                     </p>
                                 </div>
+                                @if($rental->payment_status)
+                                <div>
+                                    <span class="text-sm text-gray-600">Status Pembayaran:</span>
+                                    <p class="font-medium">
+                                        @if($rental->payment_status === 'paid')
+                                            <span class="text-green-600">Lunas</span>
+                                        @elseif($rental->payment_status === 'pending')
+                                            <span class="text-yellow-600">Menunggu</span>
+                                        @elseif($rental->payment_status === 'failed')
+                                            <span class="text-red-600">Gagal</span>
+                                        @elseif($rental->payment_status === 'expired')
+                                            <span class="text-gray-600">Kadaluarsa</span>
+                                        @endif
+                                    </p>
+                                </div>
+                                @endif
                                 @if($rental->status === 'overdue')
                                 <div>
                                     <span class="text-sm text-gray-600">Denda Terlambat:</span>
@@ -147,6 +169,30 @@
                             <p class="text-gray-700">{{ $rental->purpose }}</p>
                         </div>
                     </div>
+
+                    <!-- Payment Information (if pending payment) -->
+                    @if($rental->status === 'pending' && $rental->payment_status === 'pending')
+                    <div class="mb-8">
+                        <h3 class="text-lg font-semibold mb-4">Pembayaran</h3>
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <svg class="w-5 h-5 text-yellow-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <div>
+                                        <p class="font-medium text-yellow-800">Pembayaran Belum Selesai</p>
+                                        <p class="text-sm text-yellow-600">Silakan selesaikan pembayaran untuk mengaktifkan peminjaman.</p>
+                                    </div>
+                                </div>
+                                <a href="{{ route('rentals.payment', $rental->id) }}"
+                                   class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                    Bayar Sekarang
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
 
                     <!-- Action Buttons -->
                     <div class="flex items-center justify-end space-x-4">

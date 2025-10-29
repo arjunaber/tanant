@@ -22,6 +22,9 @@ class Rental extends Model
         'status',
         'purpose',
         'processed_by',
+        'transaction_id',
+        'payment_status',
+        'payment_url',
     ];
 
     protected $casts = [
@@ -67,6 +70,26 @@ class Rental extends Model
     public function isCancelled()
     {
         return $this->status === 'cancelled';
+    }
+
+    public function isPaymentPending()
+    {
+        return $this->payment_status === 'pending';
+    }
+
+    public function isPaymentPaid()
+    {
+        return $this->payment_status === 'paid';
+    }
+
+    public function isPaymentExpired()
+    {
+        return $this->payment_status === 'expired';
+    }
+
+    public function isPaymentFailed()
+    {
+        return $this->payment_status === 'failed';
     }
 
     public function getRentalDays()
@@ -188,8 +211,8 @@ class Rental extends Model
         });
 
         static::created(function ($rental) {
-            // Update unit status to occupied when rental is created
-            if ($rental->unit) {
+            // Only update unit status to occupied when rental is active (paid)
+            if ($rental->unit && $rental->status === 'active') {
                 $rental->unit->update(['status' => 'occupied']);
             }
         });

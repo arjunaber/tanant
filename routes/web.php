@@ -9,6 +9,7 @@ use App\Http\Controllers\UnitController;
 use App\Http\Controllers\RentalController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\PaymentController;
 
 // Public routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -39,9 +40,17 @@ Route::middleware('auth')->group(function () {
     // Rental routes
     Route::get('/rentals/create/{unit}', [RentalController::class, 'create'])->name('rentals.create');
     Route::post('/rentals/store/{unit}', [RentalController::class, 'store'])->name('rentals.store');
+    Route::get('/rentals/payment/{rental}', [RentalController::class, 'payment'])->name('rentals.payment');
     Route::get('/my-rentals', [RentalController::class, 'myRentals'])->name('rentals.my-rentals');
     Route::get('/rentals/{id}', [RentalController::class, 'show'])->name('rentals.show');
     Route::post('/rentals/calculate-price/{unit}', [RentalController::class, 'calculatePrice'])->name('rentals.calculate-price');
+
+    // Payment routes
+    Route::post('/payment/callback', [PaymentController::class, 'callback'])->name('payment.callback')->withoutMiddleware(['auth', 'web']);
+    Route::get('/payment/success', [PaymentController::class, 'success'])->name('payment.success');
+    Route::get('/payment/failed', [PaymentController::class, 'failed'])->name('payment.failed');
+    Route::get('/payment/pending', [PaymentController::class, 'pending'])->name('payment.pending');
+    Route::get('/payment/check-status/{rental}', [PaymentController::class, 'checkStatus'])->name('payment.check-status');
 
     // Logout
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
