@@ -6,6 +6,15 @@
     <div class="table-container bg-white p-6 rounded-xl shadow-md">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-semibold text-gray-700">Kelola User</h2>
+
+            <form action="{{ route('users.index') }}" method="GET" class="flex items-center">
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama atau email..."
+                    class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 outline-none">
+                <button type="submit"
+                    class="ml-2 bg-indigo-600 text-white px-3 py-2 rounded-lg hover:bg-indigo-700 transition-all text-sm">
+                    Cari
+                </button>
+            </form>
             <button data-modal-toggle="createUserModal"
                 class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-all">
                 + Tambah User
@@ -49,65 +58,15 @@
                 @endforeach
             </tbody>
         </table>
-    </div>
-
-    {{-- Modal Create --}}
-    <div id="createUserModal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-        <div class="bg-white p-6 rounded-xl w-full max-w-md">
-            <h3 class="text-lg font-semibold mb-4">Tambah User</h3>
-            <form action="{{ route('users.store') }}" method="POST">
-                @csrf
-                <input name="name" type="text" placeholder="Nama" class="w-full mb-3 p-2 border rounded" required>
-                <input name="email" type="email" placeholder="Email" class="w-full mb-3 p-2 border rounded" required>
-
-                <select name="role" class="w-full mb-3 p-2 border rounded" required>
-                    <option value="user">User</option>
-                    <option value="admin">Admin</option>
-                </select>
-
-                <input name="password" type="password" placeholder="Password" class="w-full mb-3 p-2 border rounded"
-                    required>
-
-                <div class="flex justify-end gap-2">
-                    <button type="button" data-modal-hide="createUserModal"
-                        class="px-3 py-2 bg-gray-300 rounded">Batal</button>
-                    <button type="submit"
-                        class="px-3 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Simpan</button>
-                </div>
-            </form>
+        <div class="mt-4">
+            {{ $users->links() }}
         </div>
     </div>
 
-    {{-- Modal Edit --}}
-    <div id="editUserModal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-        <div class="bg-white p-6 rounded-xl w-full max-w-md">
-            <h3 class="text-lg font-semibold mb-4">Edit User</h3>
-            <form id="editUserForm" method="POST">
-                @csrf
-                @method('PUT')
+    @include('admin.users.create')
+    @include('admin.users.edit')
 
-                <input id="edit_name" name="name" type="text" placeholder="Nama"
-                    class="w-full mb-3 p-2 border rounded" required>
-                <input id="edit_email" name="email" type="email" placeholder="Email"
-                    class="w-full mb-3 p-2 border rounded" required>
 
-                <select id="edit_role" name="role" class="w-full mb-3 p-2 border rounded" required>
-                    <option value="user">User</option>
-                    <option value="admin">Admin</option>
-                </select>
-
-                <input id="edit_password" name="password" type="password" placeholder="(Opsional) Ganti Password"
-                    class="w-full mb-3 p-2 border rounded">
-
-                <div class="flex justify-end gap-2">
-                    <button type="button" data-modal-hide="editUserModal"
-                        class="px-3 py-2 bg-gray-300 rounded">Batal</button>
-                    <button type="submit"
-                        class="px-3 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Update</button>
-                </div>
-            </form>
-        </div>
-    </div>
 @endsection
 
 @push('scripts')
