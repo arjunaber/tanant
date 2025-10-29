@@ -47,7 +47,8 @@ class HomeController extends Controller
         }
 
         $units = $query->paginate(10); // 10 items per page
-        $categories = Category::all();
+        $categories = Category::withCount('units')
+            ->paginate(10);
 
         $user = auth()->user();
 

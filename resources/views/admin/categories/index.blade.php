@@ -359,7 +359,7 @@
                     </div>
                     <div class="mt-2 sm:mt-0">
                         <span class="text-sm text-gray-600">
-                            Total: <strong class="text-blue-600">{{ $categories->total() }}</strong> kategori
+                            Total: <strong class="text-blue-600">{{ $categories->count() }}</strong> kategori
                         </span>
                     </div>
                 </div>
@@ -579,3 +579,90 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        // Modal functions
+        function openCreateModal() {
+            const modal = document.getElementById('createCategoryModal');
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+
+            // Focus on first input
+            setTimeout(() => {
+                document.getElementById('name').focus();
+            }, 300);
+        }
+
+        function closeCreateModal() {
+            const modal = document.getElementById('createCategoryModal');
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function openEditModal(id, name, description) {
+            const modal = document.getElementById('editCategoryModal');
+            const form = document.getElementById('editCategoryForm');
+
+            // Set form action
+            form.action = `/categories/${id}`;
+
+            // Fill form data
+            document.getElementById('edit_name').value = name;
+            document.getElementById('edit_description').value = description || '';
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+
+            // Focus on first input
+            setTimeout(() => {
+                document.getElementById('edit_name').focus();
+            }, 300);
+        }
+
+        function closeEditModal() {
+            const modal = document.getElementById('editCategoryModal');
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Close modal when clicking outside
+        document.addEventListener('click', function(event) {
+            const createModal = document.getElementById('createCategoryModal');
+            const editModal = document.getElementById('editCategoryModal');
+
+            if (event.target === createModal) {
+                closeCreateModal();
+            }
+            if (event.target === editModal) {
+                closeEditModal();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeCreateModal();
+                closeEditModal();
+            }
+        });
+
+        // Handle form submissions
+        document.addEventListener('DOMContentLoaded', function() {
+            const createForm = document.querySelector('#createCategoryModal form');
+            const editForm = document.getElementById('editCategoryForm');
+
+            if (createForm) {
+                createForm.addEventListener('submit', function() {
+                    closeCreateModal();
+                });
+            }
+
+            if (editForm) {
+                editForm.addEventListener('submit', function() {
+                    closeEditModal();
+                });
+            }
+        });
+    </script>
+@endpush

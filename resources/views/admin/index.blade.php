@@ -1,7 +1,6 @@
-{{-- resources/views/admin/categories/index.blade.php --}}
 @extends('layouts.admin')
 
-@section('title', 'Kelola Kategori')
+@section('title', 'Dashboard Admin')
 
 @push('styles')
     <style>
@@ -106,188 +105,148 @@
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         }
 
-        /* Modal Styles */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(4px);
-            z-index: 1000;
-        }
-
-        .modal-overlay.active {
+        /* Pagination Modern */
+        .pagination-container {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
+            padding: 1.5rem 2rem;
+            background: linear-gradient(to right, #f8fafc, #f1f5f9);
+            border-top: 1px solid #e2e8f0;
         }
 
-        .modal-container {
-            background: white;
-            border-radius: 1rem;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            width: 90%;
-            max-width: 500px;
-            max-height: 90vh;
-            overflow: hidden;
-            transform: scale(0.9);
-            opacity: 0;
-            transition: all 0.3s ease;
+        .pagination-info {
+            font-size: 0.9375rem;
+            color: #475569;
+            font-weight: 500;
         }
 
-        .modal-container.active {
-            transform: scale(1);
-            opacity: 1;
-        }
-
-        .modal-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 1.5rem;
-            color: white;
-        }
-
-        .modal-title {
-            font-size: 1.25rem;
+        .pagination-info strong {
+            color: #667eea;
             font-weight: 700;
         }
 
-        .modal-close {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 0;
-            width: 2rem;
-            height: 2rem;
+        .pagination-links {
             display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .pagination-link {
+            min-width: 2.5rem;
+            height: 2.5rem;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            border-radius: 0.375rem;
-            transition: background-color 0.2s;
-        }
-
-        .modal-close:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .modal-body {
-            padding: 1.5rem;
-            max-height: calc(90vh - 120px);
-            overflow-y: auto;
-        }
-
-        .modal-footer {
-            padding: 1rem 1.5rem;
-            background: #f8fafc;
-            border-top: 1px solid #e2e8f0;
-            display: flex;
-            gap: 0.75rem;
-            justify-content: flex-end;
-        }
-
-        .btn {
-            padding: 0.625rem 1.25rem;
+            padding: 0 0.75rem;
+            border: 2px solid #e2e8f0;
             border-radius: 0.5rem;
+            color: #475569;
+            text-decoration: none;
+            font-size: 0.9375rem;
             font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: none;
+            transition: all 0.2s ease;
+            background: white;
         }
 
-        .btn-primary {
+        .pagination-link:hover:not(.disabled):not(.active) {
             background: #667eea;
             color: white;
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
         }
 
-        .btn-primary:hover {
-            background: #5a6fd8;
+        .pagination-link.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
             transform: translateY(-1px);
         }
 
-        .btn-secondary {
-            background: white;
-            color: #475569;
-            border: 1px solid #d1d5db;
+        .pagination-link.disabled {
+            color: #cbd5e1;
+            cursor: not-allowed;
+            background: #f8fafc;
+            border-color: #e2e8f0;
         }
 
-        .btn-secondary:hover {
-            background: #f9fafb;
+        .pagination-link.disabled:hover {
+            transform: none;
         }
 
-        .form-group {
-            margin-bottom: 1rem;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 0.5rem;
+        .pagination-ellipsis {
+            padding: 0 0.5rem;
+            color: #94a3b8;
             font-weight: 600;
-            color: #374151;
         }
 
-        .form-input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #d1d5db;
-            border-radius: 0.5rem;
-            transition: border-color 0.2s, box-shadow 0.2s;
+        /* Arrow buttons */
+        .pagination-link.arrow {
+            font-size: 1.125rem;
         }
 
-        .form-input:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        /* Table Container */
+        .table-container {
+            overflow-x: auto;
         }
 
-        .form-textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
+        /* Responsive */
+        @media (max-width: 640px) {
+            .search-container {
+                padding: 1.5rem;
             }
 
-            to {
-                opacity: 1;
+            .search-wrapper {
+                flex-direction: column;
+            }
+
+            .btn-search,
+            .btn-reset {
+                width: 100%;
+            }
+
+            .pagination-container {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+
+            .pagination-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .pagination-link {
+                min-width: 2.25rem;
+                height: 2.25rem;
+                font-size: 0.875rem;
             }
         }
 
-        @keyframes slideIn {
-            from {
-                transform: scale(0.9);
-                opacity: 0;
+        @media (max-width: 768px) {
+            .search-input {
+                font-size: 1rem;
+                /* Prevent zoom on iOS */
             }
-
-            to {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-
-        .animate-fadeIn {
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        .animate-slideIn {
-            animation: slideIn 0.3s ease-out;
         }
     </style>
 @endpush
+@vite('resources/css/app.css')
+@stack('styles')
 
 @section('content')
     <div class="max-w-full mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <!-- Header -->
         <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-bold text-gray-800">Kelola Kategori</h1>
-            <button onclick="openCreateModal()"
+            <h1 class="text-2xl font-bold text-gray-800">Dashboard Admin</h1>
+            <button data-modal-target="createUnitModal" data-modal-toggle="createUnitModal"
                 class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                 </svg>
-                Tambah Kategori Baru
+                Tambah Unit Baru
             </button>
         </div>
 
@@ -303,17 +262,6 @@
             </div>
         @endif
 
-        @if (session('error'))
-            <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded flex items-center">
-                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd"
-                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                        clip-rule="evenodd"></path>
-                </svg>
-                {{ session('error') }}
-            </div>
-        @endif
-
         @if ($errors->any())
             <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
                 <strong class="font-semibold">Error:</strong>
@@ -325,24 +273,38 @@
             </div>
         @endif
 
-        <!-- Search Bar -->
-        <div class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-6 shadow-lg mb-6">
-            <form method="GET" action="{{ route('categories.index') }}" class="flex flex-col sm:flex-row gap-4">
-                <div class="relative flex-1">
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari kategori..."
-                        class="w-full py-3 pl-10 pr-4 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400">
-                    <svg class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" fill="none"
-                        stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                    </svg>
-                </div>
-                <div class="flex gap-2">
-                    <button type="submit"
-                        class="bg-white text-indigo-600 font-semibold px-6 py-3 rounded-lg hover:bg-gray-100 transition">Cari</button>
+        <!-- Search Bar Modern -->
+        <div class="search-container">
+            <form method="GET" action="{{ route('admin.index') }}">
+                <label class="search-label">Cari Unit Berdasarkan Nama</label>
+                <div class="search-wrapper">
+                    <div class="search-input-group">
+                        <svg class="search-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        <input type="text" name="search" value="{{ request('search') }}"
+                            placeholder="Ketik nama unit yang ingin dicari..." class="search-input" autocomplete="off">
+                    </div>
+                    <button type="submit" class="btn-search">
+                        <span class="flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                            Cari
+                        </span>
+                    </button>
                     @if (request('search'))
-                        <a href="{{ route('categories.index') }}"
-                            class="bg-white text-gray-600 font-semibold px-6 py-3 rounded-lg hover:bg-gray-100 transition">Reset</a>
+                        <a href="{{ route('admin.index') }}" class="btn-reset">
+                            <span class="flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                                Reset
+                            </span>
+                        </a>
                     @endif
                 </div>
             </form>
@@ -354,30 +316,34 @@
             <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <h2 class="text-lg font-semibold text-gray-800">Daftar Kategori</h2>
-                        <p class="text-sm text-gray-600 mt-1">Kelola semua kategori yang tersedia dalam sistem</p>
+                        <h2 class="text-lg font-semibold text-gray-800">Daftar Unit</h2>
+                        <p class="text-sm text-gray-600 mt-1">Kelola semua unit yang tersedia dalam sistem</p>
                     </div>
                     <div class="mt-2 sm:mt-0">
                         <span class="text-sm text-gray-600">
-                            Total: <strong class="text-blue-600">{{ $categories->total() }}</strong> kategori
+                            Total: <strong class="text-blue-600">{{ $units->total() }}</strong> unit
                         </span>
                     </div>
                 </div>
             </div>
 
             <!-- Table -->
-            <div class="overflow-x-auto">
+            <div class="table-container">
                 <table class="w-full min-w-full">
                     <thead>
                         <tr class="bg-gray-50">
                             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">No
                             </th>
                             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                Nama Kategori</th>
+                                Nama Unit</th>
                             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                Deskripsi</th>
+                                Kategori</th>
                             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                Jumlah Unit</th>
+                                Harga</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                Kapasitas</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                Status</th>
                             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                 Tanggal Dibuat</th>
                             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
@@ -385,34 +351,92 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                        @forelse ($categories as $category)
+                        @forelse ($units as $unit)
                             <tr class="hover:bg-gray-50 transition-colors">
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                                    {{ ($categories->currentPage() - 1) * $categories->perPage() + $loop->iteration }}
+                                    {{ ($units->currentPage() - 1) * $units->perPage() + $loop->iteration }}
                                 </td>
                                 <td class="px-6 py-4">
-                                    <div class="text-sm font-semibold text-gray-900">{{ $category->name }}</div>
+                                    <div class="text-sm font-semibold text-gray-900">{{ $unit->name }}</div>
+                                    @if ($unit->description)
+                                        <div class="text-sm text-gray-500 mt-1 max-w-xs">
+                                            {{ Str::limit($unit->description, 50) }}
+                                        </div>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4">
-                                    <div class="text-sm text-gray-700 max-w-xs">
-                                        {{ $category->description ? Str::limit($category->description, 50) : '-' }}
+                                    <div class="flex flex-wrap gap-1">
+                                        @foreach ($unit->categories as $category)
+                                            <span
+                                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                {{ $category->name }}
+                                            </span>
+                                        @endforeach
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <span
-                                        class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                        {{ $category->units_count }} unit
-                                    </span>
+                                    @if ($unit->price_per_day)
+                                        <div class="text-sm font-semibold text-green-600">
+                                            Rp {{ number_format($unit->price_per_day, 0, ',', '.') }}
+                                        </div>
+                                        <div class="text-xs text-gray-500">/hari</div>
+                                    @else
+                                        <span class="text-sm text-gray-400">-</span>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    @if ($unit->capacity)
+                                        <div class="flex items-center text-sm text-gray-700">
+                                            <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
+                                                </path>
+                                            </svg>
+                                            {{ $unit->capacity }} orang
+                                        </div>
+                                    @else
+                                        <span class="text-sm text-gray-400">-</span>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    @if ($unit->status === 'available')
+                                        <span
+                                            class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd"
+                                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                    clip-rule="evenodd"></path>
+                                            </svg>
+                                            Tersedia
+                                        </span>
+                                    @else
+                                        <span
+                                            class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd"
+                                                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                                    clip-rule="evenodd"></path>
+                                            </svg>
+                                            Tidak Tersedia
+                                        </span>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                                    <div>{{ $category->created_at->format('d M Y') }}</div>
-                                    <div class="text-xs text-gray-500">{{ $category->created_at->format('H:i') }}</div>
+                                    <div>{{ $unit->created_at->format('d M Y') }}</div>
+                                    <div class="text-xs text-gray-500">{{ $unit->created_at->format('H:i') }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center space-x-2">
                                         <button
-                                            onclick="openEditModal({{ $category->id }}, '{{ $category->name }}', '{{ $category->description }}')"
-                                            class="edit-btn inline-flex items-center justify-center px-3 py-2 bg-yellow-500 hover:bg-yellow-600 text-white text-xs font-semibold rounded transition-all duration-200 min-h-[32px]">
+                                            class="edit-btn inline-flex items-center justify-center px-3 py-2 bg-yellow-500 hover:bg-yellow-600 text-white text-xs font-semibold rounded transition-all duration-200 min-h-[32px]"
+                                            data-id="{{ $unit->id }}" data-name="{{ $unit->name }}"
+                                            data-status="{{ $unit->status }}"
+                                            data-category="{{ $unit->categories->first()->id ?? '' }}"
+                                            data-description="{{ $unit->description }}"
+                                            data-price="{{ $unit->price_per_day }}"
+                                            data-capacity="{{ $unit->capacity }}"
+                                            data-facilities="{{ $unit->facilities }}">
                                             <svg class="w-4 h-4 mr-1 flex-shrink-0" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -422,15 +446,15 @@
                                             Edit
                                         </button>
 
-                                        <form action="{{ route('categories.destroy', $category->id) }}" method="POST"
+                                        <form action="{{ route('units.destroy', $unit->id) }}" method="POST"
                                             class="inline m-0">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit"
                                                 class="inline-flex items-center justify-center px-3 py-2 bg-red-500 hover:bg-red-600 text-white text-xs font-semibold rounded transition-all duration-200 min-h-[32px]"
-                                                onclick="return confirm('Apakah Anda yakin ingin menghapus kategori ini?')">
-                                                <svg class="w-4 h-4 mr-1 flex-shrink-0" fill="none" stroke="currentColor"
-                                                    viewBox="0 0 24 24">
+                                                onclick="return confirm('Apakah Anda yakin ingin menghapus unit ini?')">
+                                                <svg class="w-4 h-4 mr-1 flex-shrink-0" fill="none"
+                                                    stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                         d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
                                                     </path>
@@ -443,14 +467,14 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                                <td colspan="8" class="px-6 py-8 text-center text-gray-500">
                                     <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none"
                                         stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+                                            d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4">
                                         </path>
                                     </svg>
-                                    <p class="text-lg font-medium">Tidak ada data kategori</p>
+                                    <p class="text-lg font-medium">Tidak ada data unit</p>
                                     @if (request('search'))
                                         <p class="text-sm mt-2">Hasil pencarian untuk
                                             "<strong>{{ request('search') }}</strong>" tidak ditemukan</p>
@@ -462,207 +486,118 @@
                 </table>
             </div>
 
-            <!-- Pagination -->
-            <div
-                class="flex flex-col sm:flex-row justify-between items-center bg-gray-50 p-4 rounded-lg shadow mt-4 gap-2">
-                <div class="text-sm text-gray-700">
-                    Menampilkan <span class="font-semibold text-indigo-600">{{ $categories->firstItem() ?? 0 }}</span> -
-                    <span class="font-semibold text-indigo-600">{{ $categories->lastItem() ?? 0 }}</span> dari
-                    <span class="font-semibold text-indigo-600">{{ $categories->total() }}</span> kategori
-                </div>
-                <div class="flex flex-wrap gap-2">
-                    @if ($categories->onFirstPage())
-                        <span class="px-3 py-1 rounded bg-gray-200 text-gray-400 cursor-not-allowed">‹</span>
-                    @else
-                        <a href="{{ $categories->previousPageUrl() }}"
-                            class="px-3 py-1 rounded bg-white border border-gray-300 hover:bg-indigo-600 hover:text-white transition">‹</a>
-                    @endif
-
-                    @for ($i = 1; $i <= $categories->lastPage(); $i++)
-                        @if ($i == $categories->currentPage())
-                            <span class="px-3 py-1 rounded bg-indigo-600 text-white">{{ $i }}</span>
+            <!-- Pagination Modern -->
+            @if ($units->hasPages())
+                <div class="pagination-container">
+                    <div class="pagination-info">
+                        Menampilkan <strong>{{ $units->firstItem() ?? 0 }}</strong> -
+                        <strong>{{ $units->lastItem() ?? 0 }}</strong> dari <strong>{{ $units->total() }}</strong> unit
+                    </div>
+                    <div class="pagination-links">
+                        {{-- Previous Button --}}
+                        @if ($units->onFirstPage())
+                            <span class="pagination-link disabled arrow">‹</span>
                         @else
-                            <a href="{{ $categories->appends(request()->query())->url($i) }}"
-                                class="px-3 py-1 rounded bg-white border border-gray-300 hover:bg-indigo-600 hover:text-white transition">{{ $i }}</a>
+                            <a href="{{ $units->appends(request()->query())->previousPageUrl() }}"
+                                class="pagination-link arrow">‹</a>
                         @endif
-                    @endfor
 
-                    @if ($categories->hasMorePages())
-                        <a href="{{ $categories->nextPageUrl() }}"
-                            class="px-3 py-1 rounded bg-white border border-gray-300 hover:bg-indigo-600 hover:text-white transition">›</a>
-                    @else
-                        <span class="px-3 py-1 rounded bg-gray-200 text-gray-400 cursor-not-allowed">›</span>
-                    @endif
+                        {{-- Page Numbers --}}
+                        @php
+                            $start = max($units->currentPage() - 2, 1);
+                            $end = min($start + 4, $units->lastPage());
+                            $start = max($end - 4, 1);
+                        @endphp
+
+                        @if ($start > 1)
+                            <a href="{{ $units->appends(request()->query())->url(1) }}" class="pagination-link">1</a>
+                            @if ($start > 2)
+                                <span class="pagination-ellipsis">⋯</span>
+                            @endif
+                        @endif
+
+                        @for ($i = $start; $i <= $end; $i++)
+                            @if ($i == $units->currentPage())
+                                <span class="pagination-link active">{{ $i }}</span>
+                            @else
+                                <a href="{{ $units->appends(request()->query())->url($i) }}"
+                                    class="pagination-link">{{ $i }}</a>
+                            @endif
+                        @endfor
+
+                        @if ($end < $units->lastPage())
+                            @if ($end < $units->lastPage() - 1)
+                                <span class="pagination-ellipsis">⋯</span>
+                            @endif
+                            <a href="{{ $units->appends(request()->query())->url($units->lastPage()) }}"
+                                class="pagination-link">{{ $units->lastPage() }}</a>
+                        @endif
+
+                        {{-- Next Button --}}
+                        @if ($units->hasMorePages())
+                            <a href="{{ $units->appends(request()->query())->nextPageUrl() }}"
+                                class="pagination-link arrow">›</a>
+                        @else
+                            <span class="pagination-link disabled arrow">›</span>
+                        @endif
+                    </div>
                 </div>
-            </div>
+            @endif
         </div>
     </div>
 
-    <!-- Create Category Modal -->
-    <div id="createCategoryModal" class="modal-overlay">
-        <div class="modal-container animate-slideIn">
-            <div class="modal-header">
-                <div class="flex justify-between items-center">
-                    <h3 class="modal-title">Tambah Kategori Baru</h3>
-                    <button type="button" class="modal-close" onclick="closeCreateModal()">
-                        &times;
-                    </button>
-                </div>
-            </div>
-            <form action="{{ route('categories.store') }}" method="POST">
-                @csrf
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="name" class="form-label">Nama Kategori <span
-                                class="text-red-500">*</span></label>
-                        <input type="text" name="name" id="name" class="form-input"
-                            placeholder="Masukkan nama kategori" required value="{{ old('name') }}">
-                        @error('name')
-                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-                    <div class="form-group">
-                        <label for="description" class="form-label">Deskripsi</label>
-                        <textarea name="description" id="description" class="form-input form-textarea"
-                            placeholder="Masukkan deskripsi kategori (opsional)">{{ old('description') }}</textarea>
-                        @error('description')
-                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick="closeCreateModal()">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan Kategori</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Edit Category Modal -->
-    <div id="editCategoryModal" class="modal-overlay">
-        <div class="modal-container animate-slideIn">
-            <div class="modal-header">
-                <div class="flex justify-between items-center">
-                    <h3 class="modal-title">Edit Kategori</h3>
-                    <button type="button" class="modal-close" onclick="closeEditModal()">
-                        &times;
-                    </button>
-                </div>
-            </div>
-            <form id="editCategoryForm" method="POST">
-                @csrf
-                @method('PUT')
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="edit_name" class="form-label">Nama Kategori <span
-                                class="text-red-500">*</span></label>
-                        <input type="text" name="name" id="edit_name" class="form-input"
-                            placeholder="Masukkan nama kategori" required>
-                        @error('name')
-                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-                    <div class="form-group">
-                        <label for="edit_description" class="form-label">Deskripsi</label>
-                        <textarea name="description" id="edit_description" class="form-input form-textarea"
-                            placeholder="Masukkan deskripsi kategori (opsional)"></textarea>
-                        @error('description')
-                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Batal</button>
-                    <button type="submit" class="btn btn-primary">Update Kategori</button>
-                </div>
-            </form>
-        </div>
-    </div>
+    @include('admin.units.create')
+    @include('admin.units.edit')
 @endsection
 
 @push('scripts')
     <script>
-        // Modal functions
-        function openCreateModal() {
-            const modal = document.getElementById('createCategoryModal');
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-
-            // Focus on first input
-            setTimeout(() => {
-                document.getElementById('name').focus();
-            }, 300);
-        }
-
-        function closeCreateModal() {
-            const modal = document.getElementById('createCategoryModal');
-            modal.classList.remove('active');
-            document.body.style.overflow = '';
-        }
-
-        function openEditModal(id, name, description) {
-            const modal = document.getElementById('editCategoryModal');
-            const form = document.getElementById('editCategoryForm');
-
-            // Set form action
-            form.action = `/categories/${id}`;
-
-            // Fill form data
-            document.getElementById('edit_name').value = name;
-            document.getElementById('edit_description').value = description || '';
-
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-
-            // Focus on first input
-            setTimeout(() => {
-                document.getElementById('edit_name').focus();
-            }, 300);
-        }
-
-        function closeEditModal() {
-            const modal = document.getElementById('editCategoryModal');
-            modal.classList.remove('active');
-            document.body.style.overflow = '';
-        }
-
-        // Close modal when clicking outside
-        document.addEventListener('click', function(event) {
-            const createModal = document.getElementById('createCategoryModal');
-            const editModal = document.getElementById('editCategoryModal');
-
-            if (event.target === createModal) {
-                closeCreateModal();
-            }
-            if (event.target === editModal) {
-                closeEditModal();
-            }
-        });
-
-        // Close modal with Escape key
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                closeCreateModal();
-                closeEditModal();
-            }
-        });
-
-        // Handle form submissions
         document.addEventListener('DOMContentLoaded', function() {
-            const createForm = document.querySelector('#createCategoryModal form');
-            const editForm = document.getElementById('editCategoryForm');
+            // Modal handlers
+            const editButtons = document.querySelectorAll('.edit-btn');
+            const editModal = document.getElementById('editUnitModal');
+            const closeEditModal = document.getElementById('closeEditModal');
+            const editForm = document.getElementById('editUnitForm');
 
-            if (createForm) {
-                createForm.addEventListener('submit', function() {
-                    closeCreateModal();
+            editButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const data = this.dataset;
+                    editForm.action = `/units/${data.id}`;
+                    document.getElementById('edit_name').value = data.name;
+                    document.getElementById('edit_status').value = data.status;
+                    document.getElementById('edit_category').value = data.category;
+                    document.getElementById('edit_description').value = data.description || '';
+                    document.getElementById('edit_price_per_day').value = data.price || '';
+                    document.getElementById('edit_capacity').value = data.capacity || '';
+                    document.getElementById('edit_facilities').value = data.facilities || '';
+                    editModal.classList.remove('hidden');
+                });
+            });
+
+            if (closeEditModal) {
+                closeEditModal.addEventListener('click', () => editModal.classList.add('hidden'));
+            }
+
+            if (editModal) {
+                editModal.addEventListener('click', (e) => {
+                    if (e.target === editModal) editModal.classList.add('hidden');
                 });
             }
 
-            if (editForm) {
-                editForm.addEventListener('submit', function() {
-                    closeEditModal();
+            // Create modal
+            document.querySelectorAll('[data-modal-toggle]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const target = document.getElementById(btn.dataset.modalTarget);
+                    if (target) target.classList.remove('hidden');
                 });
-            }
+            });
+
+            document.querySelectorAll('[data-modal-hide]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const target = btn.closest('[id$="Modal"]');
+                    if (target) target.classList.add('hidden');
+                });
+            });
         });
     </script>
 @endpush

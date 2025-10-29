@@ -11,6 +11,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PaymentController;
 
+
 // Public routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -57,9 +58,8 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/admin', [HomeController::class, 'adminIndex'])->name('admin.index');
-    // Unit routes
-    Route::get('/units', [UnitController::class, 'index'])->name('units.index');
+
+    Route::get('/units', [HomeController::class, 'adminIndex'])->name('admin.index');
     Route::get('/units/create', [UnitController::class, 'create'])->name('units.create');
     Route::post('/units', [UnitController::class, 'store'])->name('units.store');
     Route::get('/units/{id}', [UnitController::class, 'show'])->name('units.show');
