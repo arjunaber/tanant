@@ -103,9 +103,12 @@ class UnitSeeder extends Seeder
             ],
         ];
 
-        foreach ($units as $unitData) {
+        foreach ($units as $index => $unitData) {
             $categories = $unitData['categories'];
             unset($unitData['categories']);
+
+            // Make first unit occupied, rest available
+            $unitData['status'] = ($index === 0) ? 'occupied' : 'available';
 
             $unit = Unit::create($unitData);
             $unit->categories()->attach($categories);
