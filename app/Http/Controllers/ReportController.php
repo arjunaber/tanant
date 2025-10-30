@@ -11,11 +11,7 @@ use Carbon\Carbon;
 
 class ReportController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth');
-        $this->middleware('admin');
-    }
+
 
     public function index()
     {
@@ -38,7 +34,8 @@ class ReportController extends Controller
         // Get units by category
         $unitsByCategory = Unit::with('categories')
             ->selectRaw('categories.name as category_name, COUNT(*) as count')
-            ->join('categories', 'units.category_id', '=', 'categories.id')
+            ->join('category_unit', 'units.id', '=', 'category_unit.unit_id')
+            ->join('categories', 'category_unit.category_id', '=', 'categories.id')
             ->groupBy('categories.name')
             ->get();
 
