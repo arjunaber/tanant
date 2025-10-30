@@ -59,7 +59,7 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth'])->group(function () {
 
-    Route::get('/units', [HomeController::class, 'adminIndex'])->name('admin.index');
+    Route::get('/admin', [HomeController::class, 'adminIndex'])->name('admin.index');
     Route::get('/units/create', [UnitController::class, 'create'])->name('units.create');
     Route::post('/units', [UnitController::class, 'store'])->name('units.store');
     Route::get('/units/{id}', [UnitController::class, 'show'])->name('units.show');

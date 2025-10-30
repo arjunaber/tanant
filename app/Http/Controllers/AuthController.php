@@ -12,6 +12,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class AuthController extends Controller
 {
+    
     // Show registration form
     public function showRegister()
     {
@@ -82,7 +83,7 @@ class AuthController extends Controller
                     ->with('success', 'Login admin berhasil!');
             }
 
-              return view('home')
+            return redirect()->route('units.index')
                   ->with('success', 'Login berhasil! Selamat datang kembali.');
         }
 
