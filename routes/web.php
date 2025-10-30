@@ -10,6 +10,7 @@ use App\Http\Controllers\RentalController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ReportController;
 
 
 // Public routes
@@ -72,7 +73,17 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('categories', CategoryController::class)->except(['show']);
     Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
 
-    // Users Routes  
+    // Users Routes
     Route::resource('users', UserController::class)->except(['show']);
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::get('/users/{user}/rentals', [UserController::class, 'userRentals'])->name('users.rentals');
+    Route::get('/users/{user}/rentals/print', [UserController::class, 'printUserRentals'])->name('users.rentals.print');
+
+    Route::get('/reports', ReportController::class, 'index')->name('admin.reports.index');
+    Route::get('/reports/revenue/export', ReportController::class, 'exportRevenue')->name('reports.revenue.export');
+    Route::get('/reports/units/export', ReportController::class, 'exportUnits')->name('reports.units.export');
+    Route::get('/reports/maintenance/export', ReportController::class, 'exportMaintenance')->name('reports.maintenance.export');
+    Route::get('/reports/all/export', ReportController::class, 'exportAll')->name('reports.all.export');
+
+
 });

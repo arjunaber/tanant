@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Rental;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class UserController extends Controller
 {
@@ -67,5 +69,26 @@ class UserController extends Controller
         $user->delete();
 
         return redirect()->route('users.index')->with('success', 'User berhasil dihapus');
+    }
+
+    public function userRentals(User $user)
+    {
+        $rentals = Rental::with('unit')
+            ->where('user_id', $user->id)
+            ->latest()
+            ->paginate(10);
+
+        return view('admin.users.rentals', compact('user', 'rentals'));
+    }
+
+    public function printUserRentals(User $user)
+    {
+        $rentals = Rental::with('unit')
+            ->where('user_id', $user->id)
+            ->latest()
+            ->get();
+
+        $pdf = Pdf::loadView('admin.users.rentals-pdf', compact('user', 'rentals'));
+        return $pdf->download('riwayat-peminjaman-' . $user->name . '.pdf');
     }
 }
