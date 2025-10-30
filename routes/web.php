@@ -79,11 +79,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/users/{user}/rentals', [UserController::class, 'userRentals'])->name('users.rentals');
     Route::get('/users/{user}/rentals/print', [UserController::class, 'printUserRentals'])->name('users.rentals.print');
 
-    Route::get('/reports', ReportController::class, 'index')->name('admin.reports.index');
-    Route::get('/reports/revenue/export', ReportController::class, 'exportRevenue')->name('reports.revenue.export');
-    Route::get('/reports/units/export', ReportController::class, 'exportUnits')->name('reports.units.export');
-    Route::get('/reports/maintenance/export', ReportController::class, 'exportMaintenance')->name('reports.maintenance.export');
-    Route::get('/reports/all/export', ReportController::class, 'exportAll')->name('reports.all.export');
+    Route::get('/reports', [ReportController::class, 'index'])->name('admin.reports.index');
+    Route::get('/reports/revenue/export', [ReportController::class, 'exportRevenue'])->name('reports.revenue.export');
+    Route::get('/reports/units/export', [ReportController::class, 'exportUnits'])->name('reports.units.export');
+    Route::get('/reports/maintenance/export', [ReportController::class, 'exportMaintenance'])->name('reports.maintenance.export');
+    Route::get('/reports/all/export', [ReportController::class, 'exportAll'])->name('reports.all.export');
 
 
 });
