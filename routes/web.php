@@ -26,8 +26,7 @@ Route::middleware('guest')->group(function () {
 
 // Protected routes (require login)
 Route::middleware('auth')->group(function () {
-    // Dashboard route - TAMBAHKAN INI
-    Route::get('/dashboard', [HomeController::class, 'dashboard'])->name('dashboard');
+    Route::get('/', [HomeController::class, 'index'])->name('home');
 
     // Profile routes
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
@@ -48,7 +47,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/rentals/calculate-price/{unit}', [RentalController::class, 'calculatePrice'])->name('rentals.calculate-price');
 
     // Payment routes
-    Route::post('/payment/callback', [PaymentController::class, 'callback'])->name('payment.callback')->withoutMiddleware(['auth', 'web']);
+
     Route::get('/payment/success', [PaymentController::class, 'success'])->name('payment.success');
     Route::get('/payment/failed', [PaymentController::class, 'failed'])->name('payment.failed');
     Route::get('/payment/pending', [PaymentController::class, 'pending'])->name('payment.pending');
@@ -57,7 +56,7 @@ Route::middleware('auth')->group(function () {
     // Logout
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
-
+Route::post('/payment/callback', [PaymentController::class, 'callback'])->name('payment.callback')->withoutMiddleware(['auth', 'web']);
 Route::middleware(['auth'])->group(function () {
 
     Route::get('/admin', [HomeController::class, 'adminIndex'])->name('admin.index');
@@ -85,5 +84,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/reports/units/export', ReportController::class, 'exportUnits')->name('reports.units.export');
     Route::get('/reports/maintenance/export', ReportController::class, 'exportMaintenance')->name('reports.maintenance.export');
     Route::get('/reports/all/export', ReportController::class, 'exportAll')->name('reports.all.export');
+
 
 });
