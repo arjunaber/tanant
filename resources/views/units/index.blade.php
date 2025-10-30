@@ -11,17 +11,17 @@
                 <p class="text-gray-600 mt-2">Temukan ruangan perfect untuk kebutuhan Anda</p>
             </div>
 
-            <!-- Search and Filter Section -->
-            <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-                <form action="{{ url('/units') }}" method="GET"
-                    class="space-y-4 md:space-y-0 md:flex md:items-end md:space-x-4">
-                    <!-- Search Input -->
-                    <div class="flex-1">
-                        <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Cari Ruangan</label>
-                        <input type="text" name="search" id="search" value="{{ request('search') }}"
-                            placeholder="Cari berdasarkan nama atau kode ruangan..."
-                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
-                    </div>
+        <!-- Search and Filter Section -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <form action="{{ url('/units') }}" method="GET" class="space-y-4 md:space-y-0 md:flex md:items-end md:space-x-4">
+                <!-- Search Input -->
+                <div class="flex-1">
+                    <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Cari Ruangan</label>
+                    <input type="text" name="search" id="search" 
+                           value="{{ request('search') }}"
+                           placeholder="Cari berdasarkan nama atau kode ruangan..."
+                           class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                </div>
 
                     <!-- Category Filter -->
                     <div class="flex-1">
