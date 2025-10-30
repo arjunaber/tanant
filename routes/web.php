@@ -77,4 +77,5 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('users', UserController::class)->except(['show']);
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::get('/users/{user}/rentals', [UserController::class, 'userRentals'])->name('users.rentals');
+    Route::get('/users/{user}/rentals/print', [UserController::class, 'printUserRentals'])->name('users.rentals.print');
 });

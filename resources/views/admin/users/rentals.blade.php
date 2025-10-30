@@ -6,9 +6,15 @@
     <div class="table-container bg-white p-6 rounded-xl shadow-md">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-semibold text-gray-700">Riwayat Transaksi - {{ $user->name }}</h2>
-            <a href="{{ route('users.index') }}" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-all">
-                ← Kembali ke Daftar User
-            </a>
+            <div class="flex space-x-2">
+                <a href="{{ route('users.rentals.print', $user) }}" target="_blank"
+                    class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-all">
+                    📄 Cetak PDF
+                </a>
+                <a href="{{ route('users.index') }}" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-all">
+                    ← Kembali ke Daftar User
+                </a>
+            </div>
         </div>
 
         @if($rentals->count() > 0)
