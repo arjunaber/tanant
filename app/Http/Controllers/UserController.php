@@ -68,4 +68,14 @@ class UserController extends Controller
 
         return redirect()->route('users.index')->with('success', 'User berhasil dihapus');
     }
+
+    public function userRentals(User $user)
+    {
+        $rentals = \App\Models\Rental::with('unit')
+            ->where('user_id', $user->id)
+            ->latest()
+            ->paginate(10);
+
+        return view('admin.users.rentals', compact('user', 'rentals'));
+    }
 }

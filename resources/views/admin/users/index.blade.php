@@ -39,6 +39,10 @@
                         <td class="p-3">{{ $user->email }}</td>
                         <td class="p-3 capitalize">{{ $user->role }}</td>
                         <td class="p-3 text-center">
+                            <a href="{{ route('users.rentals', $user->id) }}"
+                                class="bg-blue-500 px-3 py-1 rounded text-white hover:bg-blue-600 mr-2">
+                                Riwayat Transaksi
+                            </a>
                             <button data-id="{{ $user->id }}" data-name="{{ $user->name }}"
                                 data-email="{{ $user->email }}" data-role="{{ $user->role }}"
                                 data-modal-target="editUserModal"
