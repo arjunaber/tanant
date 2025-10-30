@@ -151,7 +151,7 @@
                             </a>
                         </div>
                         <nav class="mt-5 px-2 space-y-1">
-                            <a href="{{ route('reports.index') }}"
+                            <a href="{{ route('admin.reports.index') }}"
                                 class="group flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-800 hover:text-white transition">
                                 <svg class="flex-shrink-0 w-5 h-5 mr-3" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
