@@ -8,28 +8,24 @@ use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
-    // Homepage
     public function index(Request $request)
     {
-        // Get all units with pagination for load more (3 per page)
-        $unitsQuery = Unit::with('categories')
-            ->orderBy('created_at', 'desc');
+        // Ambil unit terbaru dengan relasi kategori (3 per halaman)
+        $units = Unit::with('categories')
+            ->latest()
+            ->paginate(3);
 
-        $units = $unitsQuery->paginate(3);
-
-        // Get categories with available units count
+        // Ambil kategori + jumlah unit tersedia
         $categories = Category::withCount(['units' => function ($query) {
             $query->where('status', 'available');
         }])->get();
 
-        // Check if it's AJAX request for load more
+        // Handle AJAX (load more)
         if ($request->ajax()) {
-            $view = view('partials.unit-cards', compact('units'))->render();
-
             return response()->json([
-                'html' => $view,
-                'hasMore' => $units->hasMorePages(),
-                'nextPage' => $units->nextPageUrl()
+                'html'     => view('partials.unit-cards', compact('units'))->render(),
+                'hasMore'  => $units->hasMorePages(),
+                'nextPage' => $units->nextPageUrl(),
             ]);
         }
 
