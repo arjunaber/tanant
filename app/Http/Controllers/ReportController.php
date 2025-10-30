@@ -139,4 +139,55 @@ class ReportController extends Controller
         ));
         return $pdf->download('laporan-keseluruhan-' . $startDate . '-to-' . $endDate . '.pdf');
     }
+
+    public function charts()
+    {
+        // Get data for charts
+        $totalRevenue = Rental::where('payment_status', 'paid')->sum('total_price');
+        $totalRentals = Rental::count();
+        $totalUnits = Unit::count();
+        $availableUnits = Unit::available()->count();
+        $occupiedUnits = Unit::occupied()->count();
+        $maintenanceUnits = Unit::maintenance()->count();
+
+        // Monthly revenue for the last 12 months
+        $monthlyRevenue = Rental::selectRaw('YEAR(created_at) as year, MONTH(created_at) as month, SUM(total_price) as revenue')
+            ->where('payment_status', 'paid')
+            ->where('created_at', '>=', now()->subMonths(12))
+            ->groupBy('year', 'month')
+            ->orderBy('year')
+            ->orderBy('month')
+            ->get();
+
+        // Units by category
+        $unitsByCategory = Unit::with('categories')
+            ->selectRaw('categories.name as category_name, COUNT(*) as count')
+            ->join('category_unit', 'units.id', '=', 'category_unit.unit_id')
+            ->join('categories', 'category_unit.category_id', '=', 'categories.id')
+            ->groupBy('categories.name')
+            ->get();
+
+        // Rental status distribution
+        $rentalStatus = Rental::selectRaw('status, COUNT(*) as count')
+            ->groupBy('status')
+            ->get();
+
+        // Payment status distribution
+        $paymentStatus = Rental::selectRaw('payment_status, COUNT(*) as count')
+            ->groupBy('payment_status')
+            ->get();
+
+        return view('admin.reports.charts', compact(
+            'totalRevenue',
+            'totalRentals',
+            'totalUnits',
+            'availableUnits',
+            'occupiedUnits',
+            'maintenanceUnits',
+            'monthlyRevenue',
+            'unitsByCategory',
+            'rentalStatus',
+            'paymentStatus'
+        ));
+    }
 }
