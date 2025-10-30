@@ -22,95 +22,68 @@ class PaymentController extends Controller
     // Handle Midtrans callback
     public function callback(Request $request)
     {
-        try {
-            // Get raw POST data
-            $rawPayload = file_get_contents('php://input');
-            $payload = json_decode($rawPayload, true);
+        Log::info('Midtrans Callback Received:', $request->all());
 
+        $orderId = $request->input('order_id');
+        $transactionStatus = $request->input('transaction_status');
+        $paymentType = $request->input('payment_type');
 
-            // Create notification instance with raw input
-            $notification = new Notification();
+        $rental = Rental::where('transaction_id', $orderId)->first();
 
-            $transaction = $notification->transaction_status;
-            $type = $notification->payment_type;
-            $orderId = $notification->order_id;
-            $fraud = $notification->fraud_status;
-
-          
-
-            // Find rental by transaction_id
-            $rental = Rental::where('transaction_id', $orderId)->first();
-
-            if (!$rental) {
-                Log::error('Rental not found for transaction: ' . $orderId);
-                return response()->json(['status' => 'error', 'message' => 'Rental not found']);
-            }
-
-          
-
-            // Update payment status based on transaction status
-            $updateData = [];
-
-            switch ($transaction) {
-                case 'capture':
-                    if ($type == 'credit_card') {
-                        if ($fraud == 'challenge') {
-                            $updateData['payment_status'] = 'challenge';
-                        } else {
-                            $updateData['payment_status'] = 'paid';
-                            $updateData['status'] = 'active';
-                        }
-                    }
-                    break;
-
-                case 'settlement':
-                    $updateData['payment_status'] = 'paid';
-                    $updateData['status'] = 'active';
-                    break;
-
-                case 'pending':
-                    $updateData['payment_status'] = 'pending';
-                    break;
-
-                case 'deny':
-                case 'cancel':
-                    $updateData['payment_status'] = 'failed';
-                    $updateData['status'] = 'cancelled';
-                    break;
-
-                case 'expire':
-                    $updateData['payment_status'] = 'expired';
-                    $updateData['status'] = 'cancelled';
-                    break;
-
-                default:
-                    Log::warning('Unhandled transaction status:', ['status' => $transaction]);
-                    break;
-            }
-
-            // Update rental status
-            $rental->update($updateData);
-
-            // Update unit status based on rental status
-            if ($rental->unit) {
-                $unitStatus = 'available';
-                if ($rental->status === 'active') {
-                    $unitStatus = 'occupied';
-                }
-
-                $rental->unit->update(['status' => $unitStatus]);
-
-            }
-
-
-
-            return response()->json(['status' => 'success']);
-
-        } catch (\Exception $e) {
-            Log::error('Payment callback error: ' . $e->getMessage());
-            return response()->json(['status' => 'error', 'message' => $e->getMessage()]);
+        if (!$rental) {
+            Log::warning("Rental not found for order_id: $orderId");
+            return response()->json(['status' => 'error', 'message' => 'Rental not found'], 404);
         }
+
+        Log::info("Before update rental:", [
+            'order_id' => $orderId,
+            'current_status' => $rental->status,
+            'current_payment' => $rental->payment_status
+        ]);
+
+        switch ($transactionStatus) {
+            case 'capture':
+            case 'settlement':
+                $rental->update([
+                    'payment_status' => 'paid',
+                    'status' => 'active',
+                ]);
+                break;
+
+            case 'pending':
+                $rental->update(['payment_status' => 'pending']);
+                break;
+
+            case 'deny':
+            case 'cancel':
+            case 'expire':
+                $rental->update([
+                    'payment_status' => 'failed',
+                    'status' => 'cancelled',
+                ]);
+                break;
+        }
+
+        $rental->refresh();
+
+        Log::info("After update rental:", [
+            'rental_id' => $rental->id,
+            'payment_status' => $rental->payment_status,
+            'status' => $rental->status
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Callback processed successfully',
+            'data' => [
+                'order_id' => $orderId,
+                'transaction_status' => $transactionStatus,
+                'payment_status' => $rental->payment_status,
+            ],
+        ]);
     }
+
+
 
     // Handle payment success redirect
     public function success(Request $request)
@@ -119,13 +92,22 @@ class PaymentController extends Controller
         $rental = Rental::where('transaction_id', $orderId)->first();
 
         if ($rental) {
+            // Jika masih pending, update jadi paid
+            if ($rental->payment_status === 'pending') {
+                $rental->update([
+                    'payment_status' => 'paid',
+                    'status' => 'active',
+                ]);
+            }
+
             return redirect()->route('rentals.show', $rental->id)
-                ->with('success', 'Pembayaran berhasil! Status pembayaran akan diperbarui dalam beberapa saat.');
+                ->with('success', 'Pembayaran berhasil! Status pembayaran telah diperbarui.');
         }
 
         return redirect()->route('rentals.my-rentals')
             ->with('error', 'Pembayaran berhasil, namun data peminjaman tidak ditemukan.');
     }
+
 
     // Handle payment failure redirect
     public function failed(Request $request)
